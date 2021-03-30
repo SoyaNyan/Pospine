@@ -16,12 +16,13 @@ let state = false;
 let truthLabel = 0;
 
 function setup() {
-    createCanvas(640, 480);
+    let p5Canvas = createCanvas(640, 480);
+    p5Canvas.parent("video-canvas");
     video = createCapture(VIDEO);
     video.size(width, height);
 
     const option = {
-        detectionType: 'single'
+        detectionType: "single", // single pose mode
     };
 
     // Create a new poseNet method with a single detection
@@ -30,10 +31,11 @@ function setup() {
     // with an array every time new poses are detected
     poseNet.on("pose", function (results) {
         poses = results;
-        if(state) {
-            while(batchCount < 1) {
-                proccessData(poses);
+        select("#output").html(poses);
 
+        if (state) {
+            while (batchCount < 1) {
+                proccessData(poses);
                 batchCount++;
             }
             state = false;
@@ -44,12 +46,14 @@ function setup() {
     video.hide();
 }
 
+function printOutput(data) {}
+
 function proccessData(data) {
     let pose = data[0].pose;
     let keyPoints = pose.keypoints;
     let tmpArray = [];
 
-    keyPoints.forEach(point => { 
+    keyPoints.forEach((point) => {
         tmpArray.push(point.position.x);
         tmpArray.push(point.position.y);
     });
@@ -58,19 +62,19 @@ function proccessData(data) {
 }
 
 function saveData(feature, label) {
-    let loadedFeatureData = JSON.parse(localStorage.getItem('featureData'));
-    if(loadedFeatureData === null) {
+    let loadedFeatureData = JSON.parse(localStorage.getItem("featureData"));
+    if (loadedFeatureData === null) {
         loadedFeatureData = [];
     }
     loadedFeatureData.push(feature);
-    localStorage.setItem('featureData', JSON.stringify(loadedFeatureData));
+    localStorage.setItem("featureData", JSON.stringify(loadedFeatureData));
 
-    let loadedLabelData = JSON.parse(localStorage.getItem('labelData'));
-    if(loadedLabelData === null) {
+    let loadedLabelData = JSON.parse(localStorage.getItem("labelData"));
+    if (loadedLabelData === null) {
         loadedLabelData = [];
     }
     loadedLabelData.push(label);
-    localStorage.setItem('labelData', JSON.stringify(loadedLabelData));
+    localStorage.setItem("labelData", JSON.stringify(loadedLabelData));
 }
 
 function modelReady() {
