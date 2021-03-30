@@ -10,5 +10,5 @@ $(document).on("click", "#capture-start", function () {
 });
 
 $(document).on("change", "input[name=truthLabel]", function () {
-    truthLabel = $("input[name=truthLabel]:checked").val();
+    truthLabel = parseInt($("input[name=truthLabel]:checked").val());
 });

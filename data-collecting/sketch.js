@@ -13,7 +13,7 @@ let poseNet;
 let poses = [];
 let batchCount = 0;
 let state = false;
-let truthLabel = 0;
+let truthLabel = 1;
 
 function setup() {
     let p5Canvas = createCanvas(640, 480);
