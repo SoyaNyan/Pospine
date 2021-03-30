@@ -31,7 +31,7 @@ function setup() {
     // with an array every time new poses are detected
     poseNet.on("pose", function (results) {
         poses = results;
-        select("#output").html(poses);
+        printOutput(poses);
 
         if (state) {
             while (batchCount < 1) {
