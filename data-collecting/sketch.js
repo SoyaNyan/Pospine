@@ -46,7 +46,21 @@ function setup() {
     video.hide();
 }
 
-function printOutput(data) {}
+function printOutput(data) {
+    let pose = data[0].pose;
+    let keyPoints = pose.keypoints;
+    let tmpString = "";
+
+    keyPoints.forEach((point) => {
+        tmpString += `
+            parts: ${point.part}
+            x: ${point.position.x}
+            y: ${point.position.x}
+        \n`;
+    });
+
+    select("#output").html(tmpString);
+}
 
 function proccessData(data) {
     let pose = data[0].pose;
