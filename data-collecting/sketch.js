@@ -52,10 +52,10 @@ function printOutput(data) {
 
     keyPoints.forEach((point) => {
         tmpString += `
-            parts: ${point.part}\n
-            x: ${point.position.x}\n
-            y: ${point.position.x}\n
-        \n`;
+            parts: ${point.part}
+            x: ${point.position.x}
+            y: ${point.position.x}
+        `;
     });
 
     $("#output").text(tmpString);
