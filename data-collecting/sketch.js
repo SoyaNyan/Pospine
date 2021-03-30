@@ -58,7 +58,7 @@ function printOutput(data) {
         \n`;
     });
 
-    select("#output").html(tmpString);
+    $("#output").text(tmpString);
 }
 
 function proccessData(data) {
