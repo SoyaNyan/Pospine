@@ -11,21 +11,66 @@ PoseNet example using p5.js
 let video;
 let poseNet;
 let poses = [];
+let batchCount = 0;
+let state = false;
+let truthLabel = 0;
 
 function setup() {
     createCanvas(640, 480);
     video = createCapture(VIDEO);
     video.size(width, height);
 
+    const option = {
+        detectionType: 'single'
+    };
+
     // Create a new poseNet method with a single detection
-    poseNet = ml5.poseNet(video, modelReady);
+    poseNet = ml5.poseNet(video, option, modelReady);
     // This sets up an event that fills the global variable "poses"
     // with an array every time new poses are detected
     poseNet.on("pose", function (results) {
         poses = results;
+        if(state) {
+            while(batchCount < 1) {
+                proccessData(poses);
+
+                batchCount++;
+            }
+            state = false;
+            batchCount = 0;
+        }
     });
     // Hide the video element, and just show the canvas
     video.hide();
+}
+
+function proccessData(data) {
+    let pose = data[0].pose;
+    let keyPoints = pose.keypoints;
+    let tmpArray = [];
+
+    keyPoints.forEach(point => { 
+        tmpArray.push(point.position.x);
+        tmpArray.push(point.position.y);
+    });
+
+    saveData(tmpArray, truthLabel);
+}
+
+function saveData(feature, label) {
+    let loadedFeatureData = JSON.parse(localStorage.getItem('featureData'));
+    if(loadedFeatureData === null) {
+        loadedFeatureData = [];
+    }
+    loadedFeatureData.push(feature);
+    localStorage.setItem('featureData', JSON.stringify(loadedFeatureData));
+
+    let loadedLabelData = JSON.parse(localStorage.getItem('labelData'));
+    if(loadedLabelData === null) {
+        loadedLabelData = [];
+    }
+    loadedLabelData.push(label);
+    localStorage.setItem('labelData', JSON.stringify(loadedLabelData));
 }
 
 function modelReady() {
