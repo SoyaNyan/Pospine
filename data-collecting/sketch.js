@@ -31,7 +31,6 @@ function setup() {
     // with an array every time new poses are detected
     poseNet.on("pose", function (results) {
         poses = results;
-        printOutput(poses);
 
         if (state) {
             while (batchCount < 1) {
@@ -73,6 +72,7 @@ function proccessData(data) {
     });
 
     saveData(tmpArray, truthLabel);
+    printOutput(data);
 }
 
 function saveData(feature, label) {
