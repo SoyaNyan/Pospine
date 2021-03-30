@@ -53,8 +53,9 @@ function printOutput(data) {
     keyPoints.forEach((point) => {
         tmpString += `
             parts: ${point.part}<br>
-            x: ${Math.round(point.position.x * 100) / 100}<br>
-            y: ${Math.round(point.position.x * 100) / 100}<br>
+            x: ${point.position.x.toFixed(5)}, y: ${point.position.x.toFixed(
+            5
+        )}<br>
         `;
     });
 
