@@ -40,3 +40,14 @@ $(document).on("click", "#save-datasets", function () {
     let labelWindow = window.open();
     labelWindow.document.write(labelString);
 });
+
+$(document).on("click", "#clear-datasets", function () {
+    featureData = [];
+    labelData = [];
+    localStorage.setItem("featureData", JSON.stringify(featureData));
+    localStorage.setItem("labelData", JSON.stringify(labelData));
+
+    // update datsets info
+    $("#feature-info").text(featureData.length + " Features");
+    $("#label-info").text(labelData.length + " Labels");
+});
