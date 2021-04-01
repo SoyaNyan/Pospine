@@ -59,7 +59,7 @@ function printOutput(data) {
         `;
     });
 
-    $("#output").html(tmpString);
+    //$("#output").html(tmpString);
 }
 
 function proccessData(data) {
