@@ -59,7 +59,7 @@ poseNet.on("pose", function (results) {
 });
 ```
 
-```javascript
+```
 // ml5.js pose data structure
 [
   {
@@ -118,7 +118,7 @@ function saveData(feature, label) {
 }
 ```
 
-```json
+```
 // data.json structure
 {
     "data": {
@@ -183,7 +183,7 @@ let normalizedValidationData = { // validation set
 fs.writeFileSync("../data/validation-data.json", JSON.stringify(normalizedValidationData));
 ```
 
-```json
+```
 // train-data.json structure
 {
     "data": {
