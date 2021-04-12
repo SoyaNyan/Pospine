@@ -2,6 +2,8 @@
 
 - [About](#about)
 - [Updates](#updates)
+- [Usage](#usage)
+  - [Live Example](#)
 - [Datasets](#datasets)
   - [Collecting](#collecting)
   - [Processing](#processing)
@@ -9,8 +11,6 @@
 - [Model](#model)
 - [Training](#training)
 - [Testing](#testing)
-- [Usage](#usage)
-  - [Live Example](#)
 - [Contributors](#contributors)
 
 
