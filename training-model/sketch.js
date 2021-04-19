@@ -1,6 +1,36 @@
-// load data
-const trainData = requrie("../data/train-data.json");
-const validationData = requrie("../data/validation-data.json");
+// global variables
+let epoch = 0,
+    trainingLogs;
+let model,
+    isModelLoaded = false,
+    trainDataInput,
+    validationDataInput;
+
+// options for model.compile()
+let trainingOptions = {
+    batchSize: 32,
+    trainingEpochs: 10,
+};
+
+// options for getModel()
+let modelOptions = {
+    layers: [
+        {
+            units: 16,
+            activation: "relu",
+        },
+        {
+            units: 16,
+            activation: "relu",
+        },
+        {
+            units: 1,
+            activation: "sigmoid",
+        },
+    ],
+    learningRate: 0.1,
+    lossFunction: "binaryCrossentropy",
+};
 
 // returns tensor from data
 function dataToTensor(data) {
@@ -37,28 +67,28 @@ function getModel() {
     model.add(
         tf.layers.dense({
             inputShape: [34],
-            units: 16,
-            activation: "relu",
+            units: modelOptions.layers[0].units,
+            activation: modelOptions.layers[0].activation,
         })
     );
 
     model.add(
         tf.layers.dense({
-            units: 16,
-            activation: "relu",
+            units: modelOptions.layers[1].units,
+            activation: modelOptions.layers[1].activation,
         })
     );
 
     model.add(
         tf.layers.dense({
-            units: 1,
-            activation: "sigmoid",
+            units: modelOptions.layers[2].units,
+            activation: modelOptions.layers[2].activation,
         })
     );
 
-    const optimizer = tf.train.sgd(0.01);
+    const optimizer = tf.train.sgd(modelOptions.learningRate);
     model.compile({
-        loss: "binaryCrossentropy",
+        loss: modelOptions.lossFunction,
         optimizer: optimizer,
         metrics: ["accuracy"],
     });
@@ -66,8 +96,31 @@ function getModel() {
     return model;
 }
 
+// logging callbacks(on epoch ends)
+function epochLog(epoch, logs) {
+    let info = {
+        loss: logs.loss.toFixed(3),
+        acc: logs.acc.toFixed(3),
+        val_loss: logs.val_loss.toFixed(3),
+        val_acc: logs.val_acc.toFixed(3),
+    };
+    // save logs to global variables
+    trainingLogs = info;
+
+    document.getElementById(
+        "status"
+    ).innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Training... [Epoch: ${epoch}]`;
+    console.log(
+        `Epoch ${epoch} | [Train] Loss: ${info.loss}, Acc: ${info.acc}(${(
+            info.acc * 100
+        ).toFixed(2)}%) | [Validation] Loss: ${info.val_loss}, Acc: ${
+            info.val_acc
+        }(${(info.val_acc * 100).toFixed(2)}%)`
+    );
+}
+
 // train model
-async function trainModel(model, trainData, validationData) {
+async function trainModel(model, trainData, validationData, trainingOptions) {
     const metrics = ["loss", "val_loss", "acc", "val_acc"];
     const container = {
         name: "Model Training",
@@ -75,30 +128,88 @@ async function trainModel(model, trainData, validationData) {
         styles: { height: "1000px" },
     };
     const fitCallbacks = tfvis.show.fitCallbacks(container, metrics);
-    const BATCH_SIZE = 64;
+    const BATCH_SIZE = trainingOptions.batchSize;
 
     return model.fit(trainData.inputs, trainData.labels, {
         batchSize: BATCH_SIZE,
         validationData: [validationData.inputs, validationData.labels],
-        epochs: 10,
+        epochs: trainingOptions.trainingEpochs,
         shuffle: true,
-        callbacks: fitCallbacks,
+        callbacks: [
+            {
+                onTrainBegin: (l) => {
+                    epoch = 0;
+                    trainingLogs = {};
+                    document.getElementById("status").innerText =
+                        "Start training model.";
+
+                    // toggle start & save & export model button
+                    if (!$("#start-train").attr("disabled")) {
+                        $("#start-train").attr("disabled", true);
+                    }
+                    if (!$("#save-model").attr("disabled")) {
+                        $("#save-model").attr("disabled", true);
+                    }
+                    if (!$("#export-model").attr("disabled")) {
+                        $("#export-model").attr("disabled", true);
+                    }
+                },
+                onTrainEnd: (l) => {
+                    document.getElementById("status").innerText =
+                        "Finished training!!";
+                    console.log(
+                        `Final Results => [Train] Loss: ${
+                            trainingLogs.loss
+                        }, Acc: ${trainingLogs.acc}(${(
+                            trainingLogs.acc * 100
+                        ).toFixed(2)}%) | [Validation] Loss: ${
+                            trainingLogs.val_loss
+                        }, Acc: ${trainingLogs.val_acc}(${(
+                            trainingLogs.val_acc * 100
+                        ).toFixed(2)}%)`
+                    );
+
+                    // toggle start & save & export model button
+                    if ($("#start-train").attr("disabled")) {
+                        $("#start-train").attr("disabled", false);
+                    }
+                    if ($("#save-model").attr("disabled")) {
+                        $("#save-model").attr("disabled", false);
+                    }
+                    if ($("#export-model").attr("disabled")) {
+                        $("#export-model").attr("disabled", false);
+                    }
+
+                    // open tfvis visor
+                    if (!tfvisInstance.isOpen()) {
+                        tfvisInstance.toggle();
+                    }
+                },
+                onEpochEnd: (e, l) => {
+                    epochLog(e, l);
+                },
+            },
+            fitCallbacks,
+        ],
     });
 }
 
 // main thread
 async function run() {
     // load model
-    const model = getModel();
-    tfvis.show.modelSummary(
-        { name: "Model Architecture", tab: "Model" },
-        model
-    );
-
-    // load data
-    const trainDataInput = dataToTensor(trainData);
-    const validationDataInput = dataToTensor(validationData);
+    // model = getModel(modelOptions);
+    // tfvis.show.modelSummary(
+    //     { name: "Model Architecture", tab: "Model" },
+    //     model
+    // );
 
     // train model
-    await trainModel(model, trainDataInput, validationDataInput);
+    if (isModelLoaded) {
+        await trainModel(
+            model,
+            trainDataInput,
+            validationDataInput,
+            trainingOptions
+        );
+    }
 }

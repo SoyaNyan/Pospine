@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Pospine Training Tool</title>
+
+        <!-- bootstrap -->
+        <!-- CSS only -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
+        <style>
+            kbd {
+                background-color: #eee;
+                border-radius: 3px;
+                border: 1px solid #b4b4b4;
+                box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
+                color: #333;
+                display: inline-block;
+                font-size: .85em;
+                font-weight: 700;
+                line-height: 1;
+                padding: 2px 4px;
+                white-space: nowrap;
+            }
+
+            .tfvis-show {
+                cursor: pointer;
+            }
+
+            pre {
+                background: #333;
+                margin-bottom: 0;
+                padding: 10px;
+                max-height: 270px;
+                border-radius: 5px;
+            }
+
+            .log-boolean,
+            .log-undefined {
+                color: magenta;
+            }
+            .log-object,
+            .log-string {
+                color: orange;
+            }
+            .log-number {
+                color: cyan;
+            }
+        </style>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">Pospine</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+        
+                <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0"></ul>
+                    <div class="navbar-right">
+                        <a class="btn btn-outline-success git-link" href="https://github.com/SoyaNyan/Pospine" target="_blank"><i class="fab fa-github"></i> Git Repository</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-3">
+            <div class="row mb-2">
+                <div class="col-12">
+                    <div class="alert alert-secondary" role="alert">
+                        <strong id="status">Idle </strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            Training Control Panel
+                        </div>
+                        <div class="card-body">
+                            <div class="row h-100">
+                                <div class="col-12">
+                                    <p class="mb-2"><strong>Learning Rate</strong></p>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" id="lr-1" name="learningRate" value="1">
+                                        <label class="form-check-label" for="lr-1">
+                                            1
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" id="lr-2" name="learningRate" value="0.1" checked>
+                                        <label class="form-check-label" for="lr-2">
+                                            0.1
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" id="lr-3" name="learningRate" value="0.01">
+                                        <label class="form-check-label" for="lr-3">
+                                            0.01
+                                        </label>
+                                    </div>
+                                    <p class="mb-2 mt-2"><strong>Batch Size <small>(2 - 512)</small></strong></p>
+                                    <input type="number" class="form-control" id="batch-size" value="32" min="2" max="512" step="2">
+                                    <p class="mb-2 mt-2"><strong>Training Epochs <small>(1 - 100)</small></strong></p>
+                                    <input type="number" class="form-control" id="train-epoch" value="10" min="1" max="100" step="1">
+                                </div>
+                                <div class="col-12 align-self-end mt-3">
+                                    <div class="d-grid gap-2 mb-1">
+                                        <button id="start-train" type="button" class="btn btn-primary" disabled><strong>Start Training</strong></button>
+                                    </div>
+                                    <small>* Before start training, configure all setting values and apply to model by <kbd>Update Model</kbd> button. After training, save model data and weights by <kbd>Save Model</kbd> button.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            Model Control Panel
+                        </div>
+                        <div class="card-body">
+                            <div class="col-12">
+                                <p class="mb-2"><strong>Layer [0] <small>(units, loss)</small></strong></p>
+                                <div class="row mb-2">
+                                    <div class="col-md-5">
+                                        <input type="number" class="form-control layers" id="layer-1-unit" value="16" min="1" max="512" step="1">
+                                    </div>
+                                    <div class="col-md-7">
+                                        <select class="form-select layers" id="layer-1-activation">
+                                            <option value="relu" selected>relu</option>
+                                            <option value="sigmoid">sigmoid</option>
+                                            <option value="softmax">softmax</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <p class="mb-2"><strong>Layer [1] <small>(units, loss)</small></strong></p>
+                                <div class="row mb-2">
+                                    <div class="col-md-5">
+                                        <input type="number" class="form-control layers" id="layer-2-unit" value="16" min="1" max="512" step="1">
+                                    </div>
+                                    <div class="col-md-7">
+                                        <select class="form-select layers" id="layer-2-activation">
+                                            <option value="relu" selected>relu</option>
+                                            <option value="sigmoid">sigmoid</option>
+                                            <option value="softmax">softmax</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <p class="mb-2"><strong>Layer [2] <small>(units, loss)</small></strong></p>
+                                <div class="row mb-2">
+                                    <div class="col-md-5">
+                                        <input type="number" class="form-control layers" id="layer-3-unit" value="1" min="1" max="512" step="1">
+                                    </div>
+                                    <div class="col-md-7">
+                                        <select class="form-select layers" id="layer-3-activation">
+                                            <option value="relu">relu</option>
+                                            <option value="sigmoid" selected>sigmoid</option>
+                                            <option value="softmax">softmax</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <p class="mb-2"><strong>Loss Function</strong></p>
+                                <select class="form-select" id="loss-function">
+                                    <option value="meanSquaredError">meanSquaredError</option>
+                                    <option value="binaryCrossentropy" selected>binaryCrossentropy</option>
+                                    <option value="sigmoidCrossEntropy">sigmoidCrossEntropy</option>
+                                    <option value="softmaxCrossEntropy">softmaxCrossEntropy</option>
+                                </select>
+                            </div>
+                            <div class="col-12 align-self-end mt-3">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="d-grid">
+                                            <button id="update-model" type="button" class="btn btn-warning"><strong>Update Model</strong></button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-grid">
+                                            <button id="save-model" type="button" class="btn btn-success" disabled><strong>Save Model</strong></button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-grid">
+                                            <button id="export-model" type="button" class="btn btn-secondary" disabled><strong>Export Model</strong></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between">
+                            <span>Outputs</span>
+                            <span class="tfvis-show text-muted">tfvis <i class="fas fa-cogs"></i></span>
+                        </div>
+                        <div class="card-body">
+                            <pre id="output"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- data -->
+        <script src="train-data.js"></script>
+        <script src="validation-data.js"></script>
+        
+        <!-- tensorflow.js & tfvis -->
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"> </script>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+        <!-- jQuery -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <!-- bootstrap -->
+        <!-- JavaScript Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/js/all.min.js"></script>
+        <!-- local scripts -->
+        <script src="sketch.js" type="text/javascript"></script>
+    </body>
+</html>
