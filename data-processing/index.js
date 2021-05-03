@@ -16,6 +16,29 @@ const getMinFrom2dArray = (arr) => {
     return Math.min.apply(null, minRow);
 };
 
+const shuffleDataArray = (features, labels) => {
+    // merge features & labels
+    let arr = [];
+    for (let i = 0; i < features.length; i++) {
+        arr.push({
+            x: features[i],
+            y: labels[i],
+        });
+    }
+
+    // shuffle array
+    for (let i = arr.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+
+    // destructuring array
+    return {
+        feature: arr.map((d) => d.x),
+        label: arr.map((d) => d.y),
+    };
+};
+
 // prepare information for normalization
 let featureMax = getMaxFrom2dArray(data.feature);
 let featureMin = getMinFrom2dArray(data.feature);
@@ -42,30 +65,45 @@ let correctPoseLabels = data.label.slice(0, 683); // length: 683
 let incorrectPoseFeatures = normalizedFeatures.slice(683); // length: 674
 let incorrectPoseLabels = data.label.slice(683); // length: 674
 
+// shuffle data
+const shuffledCorrectPose = shuffleDataArray(
+    correctPoseFeatures,
+    correctPoseLabels
+);
+const shuffledIncorrectPose = shuffleDataArray(
+    incorrectPoseFeatures,
+    incorrectPoseLabels
+);
+
 // 1000 for training, 357 for evaluation
-let trainingFeatures = correctPoseFeatures
+let trainingFeatures = shuffledCorrectPose.feature
     .slice(0, 500)
-    .concat(incorrectPoseFeatures.slice(0, 500)); // length: 1000
-let trainingLabels = correctPoseLabels
+    .concat(shuffledIncorrectPose.feature.slice(0, 500)); // length: 1000
+let trainingLabels = shuffledCorrectPose.label
     .slice(0, 500)
-    .concat(incorrectPoseLabels.slice(0, 500)); // length: 1000
-let validationFeatures = correctPoseFeatures
+    .concat(shuffledIncorrectPose.label.slice(0, 500)); // length: 1000
+let validationFeatures = shuffledCorrectPose.feature
     .slice(500)
-    .concat(incorrectPoseFeatures.slice(500)); // length: 357
-let validationLabels = correctPoseLabels
+    .concat(shuffledIncorrectPose.feature.slice(500)); // length: 357
+let validationLabels = shuffledCorrectPose.label
     .slice(500)
-    .concat(incorrectPoseLabels.slice(500)); // length: 357
+    .concat(shuffledIncorrectPose.label.slice(500)); // length: 357
 
 // save normalized data
-let normalizedTrainingData = { // train set
+let normalizedTrainingData = {
+    // train set
     data: {
         feature: trainingFeatures,
         label: trainingLabels,
     },
 };
-fs.writeFileSync("../data/train-data.json", JSON.stringify(normalizedTrainingData));
+fs.writeFileSync(
+    "../data/train-data.json",
+    JSON.stringify(normalizedTrainingData)
+);
 
-let normalizedValidationData = { // validation set
+let normalizedValidationData = {
+    // validation set
     data: {
         feature: validationFeatures,
         label: validationLabels,
