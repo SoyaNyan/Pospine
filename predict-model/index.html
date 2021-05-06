@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Posenet model demo</title>
+
+        <!-- bootstrap -->
+        <!-- CSS only -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
+        <!-- p5.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js" type="text/javascript"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js" type="text/javascript"></script>
+        <!-- ml5.js -->
+        <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+
+        <style>
+            kbd {
+                background-color: #eee;
+                border-radius: 3px;
+                border: 1px solid #b4b4b4;
+                box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
+                color: #333;
+                display: inline-block;
+                font-size: .85em;
+                font-weight: 700;
+                line-height: 1;
+                padding: 2px 4px;
+                white-space: nowrap;
+            }
+
+            #video-canvas {
+                height: 480px;
+            }
+
+            .toast {
+                box-shadow: none;
+            }
+
+            #toast-container {
+                max-height: 480px;
+                overflow: auto;
+            }
+        </style>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">Pospine</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+        
+                <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0"></ul>
+                    <a class="btn btn-outline-success git-link" href="https://github.com/SoyaNyan/Pospine" target="_blank"><i class="fab fa-github"></i> Git Repository</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-3">
+            <div class="row mb-2">
+                <div class="col-12">
+                    <div class="alert alert-secondary" role="alert">
+                        <strong id="status">Idle... </strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-7">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            Video Stream
+                        </div>
+                        <div class="card-body">
+                            <div id="video-canvas" class="text-center"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            Control Panel
+                        </div>
+                        <div class="card-body">
+                            <div class="row h-100">
+                                <div class="col-12 align-self-end">
+                                    <div class="d-grid gap-2">
+                                        <button id="capture-start" type="button" class="btn btn-primary"><strong>Capture Start</strong></button>
+                                        <span class="text-muted">
+                                            <small>* Click the <kbd>capture button</kbd> or use <kbd>Spacebar</kbd> to capture & predict pose.</small>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            Outputs Example
+                        </div>
+                        <div class="card-body">
+                            <div id="toast-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-7">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between">
+                            <span>Statistics</span>
+                        </div>
+                        <div class="card-body">
+                            <span>Good Postures Ratio - </span><span id="good-percent">0%</span>
+                            <div class="progress mb-2">
+                                <div id="good-progress" class="progress-bar progress-bar-animated progress-bar-striped bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <span>Bad Postures Ratio - </span><span id="bad-percent">0%</span>
+                            <div class="progress">
+                                <div id="bad-progress" class="progress-bar progress-bar-animated progress-bar-striped bg-warning" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between">
+                            <span>Statistics Control Panel</span>
+                        </div>
+                        <div class="card-body">
+                            <span>Total Captured : </span><span id="statistics-total">0</span>
+                            <div id="control-buttons" class="d-grid gap-2 mt-2">
+                                <button class="btn btn-outline-danger" id="reset-data" type="button">Reset Data</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- jQuery -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <!-- bootstrap -->
+        <!-- JavaScript Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/js/all.min.js"></script>
+        <!-- local scripts -->
+        <script src="sketch.js" type="text/javascript"></script>
+        <script src="script.js"></script>
+    </body>
+</html>
