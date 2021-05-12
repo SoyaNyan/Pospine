@@ -77,8 +77,8 @@ function estimatePoses() {
 
 		if (state) {
 			while (batchCount < 1) {
-				let x = proccessData(poses);
-				let xs = normalizeData(x);
+				let x = normalizeData(proccessData(poses));
+				let xs = tf.tensor2d(x, [1, 34]);
 				let pred = pospine.predict(xs);
 				console.log(pred);
 			}
