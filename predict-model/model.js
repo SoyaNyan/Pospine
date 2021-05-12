@@ -1,4 +1,4 @@
-const inportModel = async (model) => {
+const inportModel = (model) => {
 	localStorage.setItem(
 		"tensorflowjs_models/pospine/model_topology",
 		JSON.stringify(model.model_topology)
@@ -13,8 +13,6 @@ const inportModel = async (model) => {
 	);
 	localStorage.setItem("tensorflowjs_models/pospine/info", JSON.stringify(model.info));
 	localStorage.setItem("tensorflowjs_models/pospine/weight_data", model.weight_data);
-
-	$("#status").text("Pospine ready!");
 };
 
 const pospineModel = {
