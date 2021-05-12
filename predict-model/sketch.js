@@ -30,6 +30,7 @@ function drawCameraIntoCanvas() {
 	drawSkeleton();
 	window.requestAnimationFrame(drawCameraIntoCanvas);
 }
+drawCameraIntoCanvas();
 
 async function setup() {
 	// let p5Canvas = createCanvas(640, 480);
@@ -87,7 +88,6 @@ function estimatePoses() {
 		// next animation loop, call posenet again to estimate poses
 		requestAnimationFrame(function () {
 			// Loop over the drawCameraIntoCanvas function
-			drawCameraIntoCanvas();
 			estimatePoses();
 		});
 	});
