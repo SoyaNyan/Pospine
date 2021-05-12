@@ -3,7 +3,7 @@ let poseNet, mobileNet, pospine;
 let poses = [];
 let batchCount = 0;
 let state = false;
-let modelReady = false;
+let isPospineLoaded = false;
 
 async function setup() {
 	let p5Canvas = createCanvas(640, 480);
@@ -32,7 +32,7 @@ async function setup() {
 				let x = proccessData(poses);
 				let xs = normalizeData(x);
 
-				if (modelReady) {
+				if (isPospineLoaded) {
 					pospine.predict(xs);
 				}
 
@@ -71,7 +71,7 @@ function modelReady() {
 
 function pospineReady() {
 	select("#status").html("Posepine ready!");
-	modelReady = true;
+	isPospineLoaded = true;
 }
 
 function draw() {
