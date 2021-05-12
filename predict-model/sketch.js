@@ -6,15 +6,11 @@ let state = false;
 let isPospineLoaded = false,
 	isVideoLoaded = false;
 
+const option = {
+	detectionType: "single", // single pose mode
+};
+
 function preload() {
-	let p5Canvas = createCanvas(640, 480);
-	p5Canvas.parent("video-canvas");
-	video = createCapture(VIDEO);
-	video.size(width, height);
-
-	// Hide the video element, and just show the canvas
-	video.hide();
-
 	// pospine with mobilenet
 	mobileNet = ml5.featureExtractor("MobileNet");
 	pospine = mobileNet.regression(video, videoReady);
@@ -22,9 +18,13 @@ function preload() {
 }
 
 async function setup() {
-	const option = {
-		detectionType: "single", // single pose mode
-	};
+	let p5Canvas = createCanvas(640, 480);
+	p5Canvas.parent("video-canvas");
+	video = createCapture(VIDEO);
+	video.size(width, height);
+
+	// Hide the video element, and just show the canvas
+	video.hide();
 
 	// Create a new poseNet method with a single detection
 	poseNet = ml5.poseNet(video, option, modelReady);
