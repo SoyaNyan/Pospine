@@ -81,7 +81,21 @@ function estimatePoses() {
 				let xs = tf.tensor2d(x, [1, 34]);
 
 				let pred = pospine.predict(xs);
-				pred.data().then((data) => console.log(data));
+				let score = 0;
+				pred.data().then((data) => {
+					score = data[0].toFixed(3);
+					if (score < 0.5) {
+						addOutputToast({
+							poseClass: true,
+							score: score,
+						});
+					} else {
+						addOutputToast({
+							poseClass: false,
+							score: score,
+						});
+					}
+				});
 
 				batchCount++;
 			}
