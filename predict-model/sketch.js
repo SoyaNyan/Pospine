@@ -39,8 +39,8 @@ async function setup() {
 		if (state) {
 			while (batchCount < 1) {
 				let x = normalizeData(proccessData(poses));
-				let pred = model.predict(x);
-				console.log(x, pred);
+				let xs = tf.tensor2d(x ,[1,34]);
+				let pred = model.predict(xs);
 				batchCount++;
 			}
 			state = false;
@@ -65,11 +65,9 @@ function proccessData(data) {
 }
 
 function normalizeData(data) {
-	return tf.tensor2d(
-		data.map((e, i) => {
-			return (e - normalizeInfo.min) / (normalizeInfo.max - normalizeInfo.min);
-		})
-	);
+	return data.map((e, i) => {
+		return (e - normalizeInfo.min) / (normalizeInfo.max - normalizeInfo.min);
+	})
 }
 
 function modelReady() {
