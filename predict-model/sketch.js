@@ -79,9 +79,14 @@ function estimatePoses() {
 			while (batchCount < 1) {
 				let x = normalizeData(proccessData(poses));
 				let xs = tf.tensor2d(x, [1, 34]);
+
 				let pred = pospine.predict(xs);
 				console.log(pred);
+
+				batchCount++;
 			}
+			state = false;
+			batchCount = 0;
 		}
 
 		// next animation loop, call posenet again to estimate poses
