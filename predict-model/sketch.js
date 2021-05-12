@@ -31,9 +31,6 @@ function drawCameraIntoCanvas() {
 	window.requestAnimationFrame(drawCameraIntoCanvas);
 }
 
-// Loop over the drawCameraIntoCanvas function
-drawCameraIntoCanvas();
-
 async function setup() {
 	// let p5Canvas = createCanvas(640, 480);
 	// p5Canvas.parent("video-canvas");
@@ -86,10 +83,9 @@ function estimatePoses() {
 	net.estimateSinglePose(video, imageScaleFactor, flipHorizontal).then(function (pose) {
 		// store the keypoints from the pose to draw it below
 		poses = pose;
-		// next animation loop, call posenet again to estimate poses
-		requestAnimationFrame(function () {
-			estimatePoses();
-		});
+
+		// Loop over the drawCameraIntoCanvas function
+		drawCameraIntoCanvas();
 	});
 }
 
