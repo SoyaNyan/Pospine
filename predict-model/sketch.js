@@ -26,13 +26,19 @@ async function setup() {
 	video.hide();
 
 	// load posenet by downloading the weights for the model.
-	posenet.load(modelSize).then(function (loadedNet) {
-		net = loadedNet;
-		// when it's loaded, start estimating poses
-		requestAnimationFrame(function () {
-			estimatePoses();
+	posenet
+		.load({
+			architecture: "MobileNetV1",
+			outputStride: outputStride,
+			multiplier: modelSize,
+		})
+		.then(function (loadedNet) {
+			net = loadedNet;
+			// when it's loaded, start estimating poses
+			requestAnimationFrame(function () {
+				estimatePoses();
+			});
 		});
-	});
 
 	// poseNet.on("pose", function (results) {
 	// 	poses = results;
@@ -56,7 +62,7 @@ async function setup() {
 
 function estimatePoses() {
 	// call posenet to estimate a pose
-	net.estimateSinglePose(capture.elt, imageScaleFactor, flipHorizontal).then(function (pose) {
+	net.estimateSinglePose(video.elt, imageScaleFactor, flipHorizontal).then(function (pose) {
 		// store the keypoints from the pose to draw it below
 		keypoints = pose.keypoints;
 		// next animation loop, call posenet again to estimate poses
@@ -87,7 +93,7 @@ function normalizeData(data) {
 
 function draw() {
 	background(255);
-	image(capture, 0, 0, 640, 480);
+	image(video, 0, 0, 640, 480);
 
 	noStroke();
 	// iterate through poses, drawing the keypoints and skeletons
