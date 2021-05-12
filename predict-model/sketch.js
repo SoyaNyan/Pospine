@@ -22,15 +22,15 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 	});
 }
 
-function drawCameraIntoCanvas() {
-	// Draw the video element into the canvas
-	ctx.drawImage(video, 0, 0, 640, 480);
-	// We can call both functions to draw all keypoints and the skeletons
-	drawKeypoints();
-	drawSkeleton();
-	window.requestAnimationFrame(drawCameraIntoCanvas);
-}
-drawCameraIntoCanvas();
+// function drawCameraIntoCanvas() {
+// 	// Draw the video element into the canvas
+// 	ctx.drawImage(video, 0, 0, 640, 480);
+// 	// We can call both functions to draw all keypoints and the skeletons
+// 	drawKeypoints();
+// 	drawSkeleton();
+// 	window.requestAnimationFrame(drawCameraIntoCanvas);
+// }
+// drawCameraIntoCanvas();
 
 async function setup() {
 	// let p5Canvas = createCanvas(640, 480);
@@ -88,6 +88,11 @@ function estimatePoses() {
 
 		// next animation loop, call posenet again to estimate poses
 		requestAnimationFrame(function () {
+			// Draw the video element into the canvas
+			ctx.drawImage(video, 0, 0, 640, 480);
+			// We can call both functions to draw all keypoints and the skeletons
+			drawKeypoints();
+			drawSkeleton();
 			// Loop over the drawCameraIntoCanvas function
 			estimatePoses();
 		});
