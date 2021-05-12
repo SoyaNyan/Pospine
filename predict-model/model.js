@@ -1,4 +1,4 @@
-const inportModel = (model) => {
+const inportModel = async (model) => {
 	localStorage.setItem(
 		"tensorflowjs_models/pospine/model_topology",
 		JSON.stringify(model.model_topology)

@@ -1,8 +1,5 @@
 $(document).ready(function () {
 	updateStatistics();
-
-	// load Pospine Model
-	inportModel(pospineModel);
 });
 
 // key events

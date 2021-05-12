@@ -22,6 +22,7 @@ async function setup() {
 	video.size(width, height);
 
 	// Pospine Model
+	inportModel(pospineModel);
 	const model = await tf.loadLayersModel("localstorage://pospine");
 
 	const option = {
@@ -37,7 +38,7 @@ async function setup() {
 
 		if (state) {
 			while (batchCount < 1) {
-				let x = normalizeData(proccessData(pose));
+				let x = normalizeData(proccessData(poses));
 				let pred = model.predict(x);
 				console.log(x, pred);
 				batchCount++;
