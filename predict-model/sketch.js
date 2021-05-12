@@ -84,7 +84,7 @@ function estimatePoses() {
 				let score = 0;
 				pred.data().then((data) => {
 					score = data[0].toFixed(3);
-					if (score < 0.5) {
+					if (score > 0.5) {
 						addOutputToast({
 							poseClass: true,
 							score: score,
