@@ -3,22 +3,25 @@ let poseNet, mobileNet, pospine;
 let poses = [];
 let batchCount = 0;
 let state = false;
-let isPospineLoaded = false;
+let isPospineLoaded = false,
+	isVideoLoaded = false;
 
-async function setup() {
+function preload() {
 	let p5Canvas = createCanvas(640, 480);
 	p5Canvas.parent("video-canvas");
 	video = createCapture(VIDEO);
 	video.size(width, height);
 
+	// pospine with mobilenet
+	mobileNet = ml5.featureExtractor("MobileNet");
+	pospine = mobileNet.regression(video, videoReady);
+	pospine.load("./pospine.json", pospineReady);
+}
+
+async function setup() {
 	const option = {
 		detectionType: "single", // single pose mode
 	};
-
-	// pospine with mobilenet
-	mobileNet = ml5.featureExtractor("MobileNet");
-	pospine = mobileNet.regression(video, pospineReady);
-	pospine.load("./pospine.json", pospineReady);
 
 	// Create a new poseNet method with a single detection
 	poseNet = ml5.poseNet(video, option, modelReady);
@@ -32,7 +35,7 @@ async function setup() {
 				let x = proccessData(poses);
 				let xs = normalizeData(x);
 
-				if (isPospineLoaded) {
+				if (isPospineLoaded && isVideoLoaded) {
 					pospine.predict(xs);
 				}
 
@@ -67,6 +70,10 @@ function normalizeData(data) {
 
 function modelReady() {
 	select("#status").html("PoseNet Loaded");
+}
+
+function videoReady() {
+	isVideoLoaded = true;
 }
 
 function pospineReady() {
