@@ -15,15 +15,15 @@ let batchCount = 0;
 let state = false;
 let truthLabel = 1;
 
+// Pospine Model
+inportModel(pospineModel);
+const model = tf.loadLayersModel("localstorage://pospine");
+
 async function setup() {
 	let p5Canvas = createCanvas(640, 480);
 	p5Canvas.parent("video-canvas");
 	video = createCapture(VIDEO);
 	video.size(width, height);
-
-	// Pospine Model
-	inportModel(pospineModel);
-	const model = await tf.loadLayersModel("localstorage://pospine");
 
 	const option = {
 		detectionType: "single", // single pose mode
@@ -39,8 +39,10 @@ async function setup() {
 		if (state) {
 			while (batchCount < 1) {
 				let x = normalizeData(proccessData(poses));
-				let xs = tf.tensor2d(x ,[1,34]);
-				let pred = model.predict(xs);
+				x = [0.5128650014712293, 0.45078931877692513, 0.585600453655447, 0.3575975926228369, 0.4318861678817371, 0.3625091688597315, 0.6682609186450007, 0.36528630578575516, 0.3481651387356954, 0.3791431325884062, 0.7239364551679092, 0.6025260634278409, 0.19811551107186443, 0.6141833778185842, 0.7832768837830814, 0.8609005919598349, 0.022459426414541805, 0.7401648494294755, 0.5576116367655377, 0.7601802745882079, 0.2525793568157015, 0.7906445211178722, 0.29015284613313164, 0.6128839956412722, 0.1649155165002558, 0.8119490332289825, 0.1800108770611313, 0.7175137426953949, 0.15772224803827867, 0.791367838663634, 0.1651062511409891, 0.8075000921630616, 0.15949092088551203, 0.8104211802518659];
+				let xs = tf.tensor(x ,[1, x.length]);
+				let pred = model.predict(xs).dataSync()[0];
+				console.log(pred);
 				batchCount++;
 			}
 			state = false;
