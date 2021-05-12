@@ -1,10 +1,16 @@
-let video;
-let poseNet, mobileNet, pospine;
+let video, net;
 let poses = [];
 let batchCount = 0;
 let state = false;
-let isPospineLoaded = false,
-	isVideoLoaded = false;
+
+// options
+let modelSize = 0.75;
+let imageScaleFactor = 0.75;
+let minPoseConfidence = 0.3;
+let minPartConfidence = 0.3;
+let flipHorizontal = false;
+let outputStride = 16;
+let maxPoseDetections = 10;
 
 const option = {
 	detectionType: "single", // single pose mode
@@ -14,37 +20,49 @@ async function setup() {
 	let p5Canvas = createCanvas(640, 480);
 	p5Canvas.parent("video-canvas");
 	video = createCapture(VIDEO);
-	video.size(width, height);
+	video.size(640, 480);
 
 	// Hide the video element, and just show the canvas
 	video.hide();
 
-	// pospine with mobilenet
-	mobileNet = ml5.featureExtractor("MobileNet");
-	pospine = mobileNet.regression(video, videoReady);
-	pospine.load("./pospine.json", pospineReady);
+	// load posenet by downloading the weights for the model.
+	posenet.load(modelSize).then(function (loadedNet) {
+		net = loadedNet;
+		// when it's loaded, start estimating poses
+		requestAnimationFrame(function () {
+			estimatePoses();
+		});
+	});
 
-	// Create a new poseNet method with a single detection
-	poseNet = ml5.poseNet(video, option, modelReady);
-	// This sets up an event that fills the global variable "poses"
-	// with an array every time new poses are detected
-	poseNet.on("pose", function (results) {
-		poses = results;
+	// poseNet.on("pose", function (results) {
+	// 	poses = results;
 
-		if (state) {
-			while (batchCount < 1) {
-				let x = proccessData(poses);
-				let xs = normalizeData(x);
+	// 	if (state) {
+	// 		while (batchCount < 1) {
+	// 			let x = proccessData(poses);
+	// 			let xs = normalizeData(x);
 
-				if (isPospineLoaded && isVideoLoaded) {
-					pospine.predict(xs);
-				}
+	// 			if (isPospineLoaded && isVideoLoaded) {
+	// 				pospine.predict(xs);
+	// 			}
 
-				batchCount++;
-			}
-			state = false;
-			batchCount = 0;
-		}
+	// 			batchCount++;
+	// 		}
+	// 		state = false;
+	// 		batchCount = 0;
+	// 	}
+	// });
+}
+
+function estimatePoses() {
+	// call posenet to estimate a pose
+	net.estimateSinglePose(capture.elt, imageScaleFactor, flipHorizontal).then(function (pose) {
+		// store the keypoints from the pose to draw it below
+		keypoints = pose.keypoints;
+		// next animation loop, call posenet again to estimate poses
+		requestAnimationFrame(function () {
+			estimatePoses();
+		});
 	});
 }
 
@@ -67,60 +85,48 @@ function normalizeData(data) {
 	});
 }
 
-function modelReady() {
-	select("#status").html("PoseNet Loaded");
-	console.log("PosNet Loaded!");
-}
-
-function videoReady() {
-	console.log("Video Ready!");
-	isVideoLoaded = true;
-}
-
-function pospineReady() {
-	select("#status").html("Posepine ready!");
-	console.log("Pospine Ready!");
-	isPospineLoaded = true;
-}
-
 function draw() {
-	image(video, 0, 0, width, height);
+	background(255);
+	image(capture, 0, 0, 640, 480);
 
-	// We can call both functions to draw all keypoints and the skeletons
-	drawKeypoints();
-	drawSkeleton();
-}
+	noStroke();
+	// iterate through poses, drawing the keypoints and skeletons
+	for (var i = 0; i < poses.length; i++) {
+		var pose = poses[i];
+		// filter out poses that do not meet the minimum pose confidence.
+		if (pose.score >= minPoseConfidence) {
+			var keypoints = pose.keypoints;
+			// draw keypoints
+			for (var j = 0; j < keypoints.length; j++) {
+				var keypoint = keypoints[j];
+				// filter out keypoints that have a low confidence
+				if (keypoint.score > minPartConfidence) {
+					// for wrists, make the part cyan
+					if (j == posenet.partIds["leftWrist"] || j == posenet.partIds["rightWrist"])
+						fill(0, 255, 255);
+					// all other parts are yellow
+					else fill(255, 255, 0);
 
-// A function to draw ellipses over the detected keypoints
-function drawKeypoints() {
-	// Loop through all the poses detected
-	for (let i = 0; i < poses.length; i += 1) {
-		// For each pose detected, loop through all the keypoints
-		const pose = poses[i].pose;
-		for (let j = 0; j < pose.keypoints.length; j += 1) {
-			// A keypoint is an object describing a body part (like rightArm or leftShoulder)
-			const keypoint = pose.keypoints[j];
-			// Only draw an ellipse is the pose probability is bigger than 0.2
-			if (keypoint.score > 0.2) {
-				fill(255, 0, 0);
-				noStroke();
-				ellipse(keypoint.position.x, keypoint.position.y, 10, 10);
+					ellipse(keypoint.position.x, keypoint.position.y, 10, 10);
+				}
 			}
-		}
-	}
-}
 
-// A function to draw the skeletons
-function drawSkeleton() {
-	// Loop through all the skeletons detected
-	for (let i = 0; i < poses.length; i += 1) {
-		const skeleton = poses[i].skeleton;
-		// For every skeleton, loop through all body connections
-		for (let j = 0; j < skeleton.length; j += 1) {
-			const partA = skeleton[j][0];
-			const partB = skeleton[j][1];
-			stroke(255, 0, 0);
-			line(partA.position.x, partA.position.y, partB.position.x, partB.position.y);
+			// get skeleton, filtering out parts wtihout
+			// a high enough confidence level
+			if (keypoints.length > 0) {
+				stroke(255, 255, 0);
+				var skeleton = posenet.getAdjacentKeyPoints(keypoints, minPartConfidence);
+				for (var j = 0; j < skeleton.length; j++) {
+					// draw each line in the skeleton
+					var segment = skeleton[j];
+					line(
+						segment[0].position.x,
+						segment[0].position.y,
+						segment[1].position.x,
+						segment[1].position.y
+					);
+				}
+			}
 		}
 	}
 }
