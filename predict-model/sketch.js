@@ -65,6 +65,7 @@ function estimatePoses() {
 	net.estimateSinglePose(video.elt, imageScaleFactor, flipHorizontal).then(function (pose) {
 		// store the keypoints from the pose to draw it below
 		keypoints = pose.keypoints;
+		console.log(pose);
 		// next animation loop, call posenet again to estimate poses
 		requestAnimationFrame(function () {
 			estimatePoses();
