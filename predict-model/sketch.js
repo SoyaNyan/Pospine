@@ -20,6 +20,21 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 	});
 }
 
+// A function to draw the video and poses into the canvas.
+// This function is independent of the result of posenet
+// This way the video will not seem slow if poseNet
+// is not detecting a position
+function drawCameraIntoCanvas() {
+	// Draw the video element into the canvas
+	ctx.drawImage(video, 0, 0, 640, 480);
+	// We can call both functions to draw all keypoints and the skeletons
+	drawKeypoints();
+	drawSkeleton();
+	window.requestAnimationFrame(drawCameraIntoCanvas);
+}
+// Loop over the drawCameraIntoCanvas function
+drawCameraIntoCanvas();
+
 // Create a new poseNet method with a single detection
 const poseNet = ml5.poseNet(video, modelReady);
 poseNet.on("pose", gotPoses);
