@@ -1,4 +1,4 @@
-let video, net;
+let net;
 let poses = [];
 let batchCount = 0;
 let state = false;
@@ -6,24 +6,45 @@ let state = false;
 // options
 let modelSize = 0.75;
 let imageScaleFactor = 0.75;
-let minPoseConfidence = 0.3;
-let minPartConfidence = 0.3;
 let flipHorizontal = false;
 let outputStride = 16;
 let maxPoseDetections = 10;
 
-const option = {
-	detectionType: "single", // single pose mode
-};
+let video = document.getElementById("video");
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+	navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+		video.srcObject = stream;
+		video.play();
+	});
+}
+
+// A function to draw the video and poses into the canvas.
+// This function is independent of the result of posenet
+// This way the video will not seem slow if poseNet
+// is not detecting a position
+function drawCameraIntoCanvas() {
+	// Draw the video element into the canvas
+	ctx.drawImage(video, 0, 0, 640, 480);
+	// We can call both functions to draw all keypoints and the skeletons
+	drawKeypoints();
+	drawSkeleton();
+	window.requestAnimationFrame(drawCameraIntoCanvas);
+}
 
 async function setup() {
-	let p5Canvas = createCanvas(640, 480);
-	p5Canvas.parent("video-canvas");
-	video = createCapture(VIDEO);
-	video.size(640, 480);
+	// Loop over the drawCameraIntoCanvas function
+	drawCameraIntoCanvas();
 
-	// Hide the video element, and just show the canvas
-	video.hide();
+	// let p5Canvas = createCanvas(640, 480);
+	// p5Canvas.parent("video-canvas");
+	// video = createCapture(VIDEO);
+	// video.size(640, 480);
+
+	// // Hide the video element, and just show the canvas
+	// video.hide();
 
 	// load posenet by downloading the weights for the model.
 	posenet
@@ -62,7 +83,7 @@ async function setup() {
 
 function estimatePoses() {
 	// call posenet to estimate a pose
-	net.estimateSinglePose(video.elt, imageScaleFactor, flipHorizontal).then(function (pose) {
+	net.estimateSinglePose(video, imageScaleFactor, flipHorizontal).then(function (pose) {
 		// store the keypoints from the pose to draw it below
 		keypoints = pose.keypoints;
 		console.log(pose);
@@ -92,48 +113,35 @@ function normalizeData(data) {
 	});
 }
 
-function draw() {
-	background(255);
-	image(video, 0, 0, 640, 480);
-
-	noStroke();
-	// iterate through poses, drawing the keypoints and skeletons
-	for (var i = 0; i < poses.length; i++) {
-		var pose = poses[i];
-		// filter out poses that do not meet the minimum pose confidence.
-		if (pose.score >= minPoseConfidence) {
-			var keypoints = pose.keypoints;
-			// draw keypoints
-			for (var j = 0; j < keypoints.length; j++) {
-				var keypoint = keypoints[j];
-				// filter out keypoints that have a low confidence
-				if (keypoint.score > minPartConfidence) {
-					// for wrists, make the part cyan
-					if (j == posenet.partIds["leftWrist"] || j == posenet.partIds["rightWrist"])
-						fill(0, 255, 255);
-					// all other parts are yellow
-					else fill(255, 255, 0);
-
-					ellipse(keypoint.position.x, keypoint.position.y, 10, 10);
-				}
+// A function to draw ellipses over the detected keypoints
+function drawKeypoints() {
+	// Loop through all the poses detected
+	for (let i = 0; i < poses.length; i += 1) {
+		// For each pose detected, loop through all the keypoints
+		for (let j = 0; j < poses[i].pose.keypoints.length; j += 1) {
+			let keypoint = poses[i].pose.keypoints[j];
+			// Only draw an ellipse is the pose probability is bigger than 0.2
+			if (keypoint.score > 0.2) {
+				ctx.beginPath();
+				ctx.arc(keypoint.position.x, keypoint.position.y, 10, 0, 2 * Math.PI);
+				ctx.stroke();
 			}
+		}
+	}
+}
 
-			// get skeleton, filtering out parts wtihout
-			// a high enough confidence level
-			if (keypoints.length > 0) {
-				stroke(255, 255, 0);
-				var skeleton = posenet.getAdjacentKeyPoints(keypoints, minPartConfidence);
-				for (var j = 0; j < skeleton.length; j++) {
-					// draw each line in the skeleton
-					var segment = skeleton[j];
-					line(
-						segment[0].position.x,
-						segment[0].position.y,
-						segment[1].position.x,
-						segment[1].position.y
-					);
-				}
-			}
+// A function to draw the skeletons
+function drawSkeleton() {
+	// Loop through all the skeletons detected
+	for (let i = 0; i < poses.length; i += 1) {
+		// For every skeleton, loop through all body connections
+		for (let j = 0; j < poses[i].skeleton.length; j += 1) {
+			let partA = poses[i].skeleton[j][0];
+			let partB = poses[i].skeleton[j][1];
+			ctx.beginPath();
+			ctx.moveTo(partA.position.x, partA.position.y);
+			ctx.lineTo(partB.position.x, partB.position.y);
+			ctx.stroke();
 		}
 	}
 }

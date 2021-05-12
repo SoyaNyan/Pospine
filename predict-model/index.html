@@ -94,7 +94,20 @@
 					<div class="card h-100">
 						<div class="card-header">Video Stream</div>
 						<div class="card-body">
-							<div id="video-canvas" class="text-center"></div>
+							<!-- <div id="video-canvas" class="text-center"></div> -->
+							<canvas
+								id="video-canvas"
+								width="640"
+								height="480"
+								class="text-center"
+							></canvas>
+							<video
+								id="video"
+								width="640"
+								height="480"
+								autoplay
+								style="display: none"
+							></video>
 						</div>
 					</div>
 				</div>
