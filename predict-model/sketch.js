@@ -12,6 +12,9 @@ function preload() {
 	video = createCapture(VIDEO);
 	video.size(width, height);
 
+	// Hide the video element, and just show the canvas
+	video.hide();
+
 	// pospine with mobilenet
 	mobileNet = ml5.featureExtractor("MobileNet");
 	pospine = mobileNet.regression(video, videoReady);
@@ -45,8 +48,6 @@ async function setup() {
 			batchCount = 0;
 		}
 	});
-	// Hide the video element, and just show the canvas
-	video.hide();
 }
 
 function proccessData(data) {
