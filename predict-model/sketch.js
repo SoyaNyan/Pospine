@@ -44,19 +44,22 @@ async function setup() {
 	// video.hide();
 
 	// load posenet by downloading the weights for the model.
-	posenet
-		.load({
-			architecture: "MobileNetV1",
-			outputStride: outputStride,
-			multiplier: modelSize,
-		})
-		.then(function (loadedNet) {
-			net = loadedNet;
-			// when it's loaded, start estimating poses
-			requestAnimationFrame(function () {
-				estimatePoses();
+	let videoElem = document.getElementById("video");
+	video.addEventListener("loadeddata", function () {
+		posenet
+			.load({
+				architecture: "MobileNetV1",
+				outputStride: outputStride,
+				multiplier: modelSize,
+			})
+			.then(function (loadedNet) {
+				net = loadedNet;
+				// when it's loaded, start estimating poses
+				requestAnimationFrame(function () {
+					estimatePoses();
+				});
 			});
-		});
+	});
 
 	// poseNet.on("pose", function (results) {
 	// 	poses = results;
