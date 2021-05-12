@@ -1,3 +1,4 @@
+// globals
 let net;
 let poses = [];
 let batchCount = 0;
@@ -11,7 +12,7 @@ let outputStride = 16;
 let maxPoseDetections = 10;
 
 let video = document.getElementById("video");
-let canvas = document.getElementById("canvas");
+let canvas = document.getElementById("video-canvas");
 let ctx = canvas.getContext("2d");
 
 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -21,10 +22,6 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 	});
 }
 
-// A function to draw the video and poses into the canvas.
-// This function is independent of the result of posenet
-// This way the video will not seem slow if poseNet
-// is not detecting a position
 function drawCameraIntoCanvas() {
 	// Draw the video element into the canvas
 	ctx.drawImage(video, 0, 0, 640, 480);
