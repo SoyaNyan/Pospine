@@ -84,6 +84,7 @@ function estimatePoses() {
 	net.estimateSinglePose(video, imageScaleFactor, flipHorizontal).then(function (pose) {
 		// store the keypoints from the pose to draw it below
 		poses = pose;
+		console.log(poses.length);
 
 		// next animation loop, call posenet again to estimate poses
 		requestAnimationFrame(function () {
@@ -122,7 +123,6 @@ function normalizeData(data) {
 function drawKeypoints() {
 	// Loop through all the poses detected
 	for (let i = 0; i < poses.length; i += 1) {
-		console.log(i);
 		// For each pose detected, loop through all the keypoints
 		for (let j = 0; j < poses[i].pose.keypoints.length; j += 1) {
 			let keypoint = poses[i].pose.keypoints[j];
