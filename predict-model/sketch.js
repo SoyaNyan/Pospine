@@ -31,10 +31,10 @@ function drawCameraIntoCanvas() {
 	window.requestAnimationFrame(drawCameraIntoCanvas);
 }
 
-async function setup() {
-	// Loop over the drawCameraIntoCanvas function
-	drawCameraIntoCanvas();
+// Loop over the drawCameraIntoCanvas function
+drawCameraIntoCanvas();
 
+async function setup() {
 	// let p5Canvas = createCanvas(640, 480);
 	// p5Canvas.parent("video-canvas");
 	// video = createCapture(VIDEO);
