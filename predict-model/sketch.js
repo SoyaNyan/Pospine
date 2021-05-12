@@ -3,6 +3,7 @@ let poseNet, mobileNet, pospine;
 let poses = [];
 let batchCount = 0;
 let state = false;
+let modelReady = false;
 
 async function setup() {
 	let p5Canvas = createCanvas(640, 480);
@@ -16,7 +17,7 @@ async function setup() {
 
 	// pospine with mobilenet
 	mobileNet = ml5.featureExtractor("MobileNet");
-	pospine = mobileNet.regression(VIDEO, pospineReady);
+	pospine = mobileNet.regression(video, pospineReady);
 	pospine.load("./pospine.json", pospineReady);
 
 	// Create a new poseNet method with a single detection
@@ -30,7 +31,11 @@ async function setup() {
 			while (batchCount < 1) {
 				let x = proccessData(poses);
 				let xs = normalizeData(x);
-				pospine.predict(xs);
+
+				if (modelReady) {
+					pospine.predict(xs);
+				}
+
 				batchCount++;
 			}
 			state = false;
@@ -66,6 +71,7 @@ function modelReady() {
 
 function pospineReady() {
 	select("#status").html("Posepine ready!");
+	modelReady = true;
 }
 
 function draw() {
