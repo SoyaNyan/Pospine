@@ -1,5 +1,5 @@
 // globals
-let net;
+let net, pospine;
 let poses = [];
 let batchCount = 0;
 let state = false;
@@ -22,25 +22,7 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 	});
 }
 
-// function drawCameraIntoCanvas() {
-// 	// Draw the video element into the canvas
-// 	ctx.drawImage(video, 0, 0, 640, 480);
-// 	// We can call both functions to draw all keypoints and the skeletons
-// 	drawKeypoints();
-// 	drawSkeleton();
-// 	window.requestAnimationFrame(drawCameraIntoCanvas);
-// }
-// drawCameraIntoCanvas();
-
 async function setup() {
-	// let p5Canvas = createCanvas(640, 480);
-	// p5Canvas.parent("video-canvas");
-	// video = createCapture(VIDEO);
-	// video.size(640, 480);
-
-	// // Hide the video element, and just show the canvas
-	// video.hide();
-
 	// load posenet by downloading the weights for the model.
 	let videoElem = document.getElementById("video");
 	video.addEventListener("loadeddata", function () {
@@ -58,6 +40,10 @@ async function setup() {
 				});
 			});
 	});
+
+	inportModel(pospineModel);
+	pospine = await tf.loadLayersModel("localstorage://pospine");
+	$("#status").text("Pospine ready!");
 
 	// poseNet.on("pose", function (results) {
 	// 	poses = results;
@@ -88,7 +74,15 @@ function estimatePoses() {
 				pose: pose,
 			},
 		];
-		console.log(poses.length);
+
+		if (state) {
+			while (batchCount < 1) {
+				let x = proccessData(poses);
+				let xs = normalizeData(x);
+				let pred = pospine.predict(xs);
+				console.log(pred);
+			}
+		}
 
 		// next animation loop, call posenet again to estimate poses
 		requestAnimationFrame(function () {
