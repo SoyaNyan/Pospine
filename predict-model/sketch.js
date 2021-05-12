@@ -96,7 +96,6 @@ function estimatePoses() {
 			ctx.drawImage(video, 0, 0, 640, 480);
 			// We can call both functions to draw all keypoints and the skeletons
 			drawKeypoints();
-			drawSkeleton();
 
 			// Loop over the drawCameraIntoCanvas function
 			estimatePoses();
