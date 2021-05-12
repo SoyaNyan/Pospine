@@ -1,51 +1,81 @@
-// Copyright (c) 2019 ml5
-//
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
+// Grab elements, create settings, etc.
+let video = document.getElementById("video");
+let canvas = document.getElementById("video-canvas");
+let ctx = canvas.getContext("2d");
 
-/* ===
-ml5 Example
-PoseNet example using p5.js
-=== */
+const option = {
+	detectionType: "single", // single pose mode
+};
 
-let video;
-let poseNet;
+// The detected positions will be inside an array
 let poses = [];
 let batchCount = 0;
 let state = false;
-let truthLabel = 1;
-let posepine;
 
-async function setup() {
-	let p5Canvas = createCanvas(640, 480);
-	p5Canvas.parent("video-canvas");
-	video = createCapture(VIDEO);
-	video.size(width, height);
-
-	const option = {
-		detectionType: "single", // single pose mode
-	};
-
-	// Create a new poseNet method with a single detection
-	poseNet = ml5.poseNet(video, option, modelReady);
-	// This sets up an event that fills the global variable "poses"
-	// with an array every time new poses are detected
-	poseNet.on("pose", function (results) {
-		poses = results;
-
-		if (state) {
-			while (batchCount < 1) {
-				let x = proccessData(poses);
-				let xs = normalizeData(x);
-				posepine.predict(xs);
-				batchCount++;
-			}
-			state = false;
-			batchCount = 0;
-		}
+// Create a webcam capture
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+	navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+		video.srcObject = stream;
+		video.play();
 	});
-	// Hide the video element, and just show the canvas
-	video.hide();
+}
+
+// Create a new poseNet method with a single detection
+const poseNet = ml5.poseNet(video, modelReady);
+poseNet.on("pose", gotPoses);
+
+// A function that gets called every time there's an update from the model
+function gotPoses(results) {
+	poses = results;
+
+	if (state) {
+		while (batchCount < 1) {
+			let x = proccessData(poses);
+			let xs = normalizeData(x);
+			posepine.predict(xs);
+			batchCount++;
+		}
+		state = false;
+		batchCount = 0;
+	}
+}
+
+function modelReady() {
+	$("#status").text("Model ready!");
+	poseNet.singlePose(video);
+}
+
+// A function to draw ellipses over the detected keypoints
+function drawKeypoints() {
+	// Loop through all the poses detected
+	for (let i = 0; i < poses.length; i += 1) {
+		// For each pose detected, loop through all the keypoints
+		for (let j = 0; j < poses[i].pose.keypoints.length; j += 1) {
+			let keypoint = poses[i].pose.keypoints[j];
+			// Only draw an ellipse is the pose probability is bigger than 0.2
+			if (keypoint.score > 0.2) {
+				ctx.beginPath();
+				ctx.arc(keypoint.position.x, keypoint.position.y, 10, 0, 2 * Math.PI);
+				ctx.stroke();
+			}
+		}
+	}
+}
+
+// A function to draw the skeletons
+function drawSkeleton() {
+	// Loop through all the skeletons detected
+	for (let i = 0; i < poses.length; i += 1) {
+		// For every skeleton, loop through all body connections
+		for (let j = 0; j < poses[i].skeleton.length; j += 1) {
+			let partA = poses[i].skeleton[j][0];
+			let partB = poses[i].skeleton[j][1];
+			ctx.beginPath();
+			ctx.moveTo(partA.position.x, partA.position.y);
+			ctx.lineTo(partB.position.x, partB.position.y);
+			ctx.stroke();
+		}
+	}
 }
 
 function proccessData(data) {
@@ -65,55 +95,4 @@ function normalizeData(data) {
 	return data.map((e, i) => {
 		return (e - normalizeInfo.min) / (normalizeInfo.max - normalizeInfo.min);
 	});
-}
-
-function modelReady() {
-	select("#status").html("PoseNet Loaded");
-	posepine.load("pospine.json", pospineReady);
-}
-
-function pospineReady() {
-	select("#status").html("Posepine ready!");
-}
-
-function draw() {
-	image(video, 0, 0, width, height);
-
-	// We can call both functions to draw all keypoints and the skeletons
-	drawKeypoints();
-	drawSkeleton();
-}
-
-// A function to draw ellipses over the detected keypoints
-function drawKeypoints() {
-	// Loop through all the poses detected
-	for (let i = 0; i < poses.length; i += 1) {
-		// For each pose detected, loop through all the keypoints
-		const pose = poses[i].pose;
-		for (let j = 0; j < pose.keypoints.length; j += 1) {
-			// A keypoint is an object describing a body part (like rightArm or leftShoulder)
-			const keypoint = pose.keypoints[j];
-			// Only draw an ellipse is the pose probability is bigger than 0.2
-			if (keypoint.score > 0.2) {
-				fill(255, 0, 0);
-				noStroke();
-				ellipse(keypoint.position.x, keypoint.position.y, 10, 10);
-			}
-		}
-	}
-}
-
-// A function to draw the skeletons
-function drawSkeleton() {
-	// Loop through all the skeletons detected
-	for (let i = 0; i < poses.length; i += 1) {
-		const skeleton = poses[i].skeleton;
-		// For every skeleton, loop through all body connections
-		for (let j = 0; j < skeleton.length; j += 1) {
-			const partA = skeleton[j][0];
-			const partB = skeleton[j][1];
-			stroke(255, 0, 0);
-			line(partA.position.x, partA.position.y, partB.position.x, partB.position.y);
-		}
-	}
 }
