@@ -84,8 +84,12 @@ function estimatePoses() {
 		// store the keypoints from the pose to draw it below
 		poses = pose;
 
-		// Loop over the drawCameraIntoCanvas function
-		drawCameraIntoCanvas();
+		// next animation loop, call posenet again to estimate poses
+		requestAnimationFrame(function () {
+			// Loop over the drawCameraIntoCanvas function
+			drawCameraIntoCanvas();
+			estimatePoses();
+		});
 	});
 }
 
