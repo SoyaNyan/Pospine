@@ -84,7 +84,6 @@ function estimatePoses() {
 	net.estimateSinglePose(video, imageScaleFactor, flipHorizontal).then(function (pose) {
 		// store the keypoints from the pose to draw it below
 		poses = pose;
-		console.log(poses);
 
 		// next animation loop, call posenet again to estimate poses
 		requestAnimationFrame(function () {
@@ -93,6 +92,7 @@ function estimatePoses() {
 			// We can call both functions to draw all keypoints and the skeletons
 			drawKeypoints();
 			drawSkeleton();
+
 			// Loop over the drawCameraIntoCanvas function
 			estimatePoses();
 		});
@@ -124,6 +124,7 @@ function drawKeypoints() {
 	for (let i = 0; i < poses.length; i += 1) {
 		// For each pose detected, loop through all the keypoints
 		for (let j = 0; j < poses[i].pose.keypoints.length; j += 1) {
+			console.log(j);
 			let keypoint = poses[i].pose.keypoints[j];
 			// Only draw an ellipse is the pose probability is bigger than 0.2
 			if (keypoint.score > 0.2) {
