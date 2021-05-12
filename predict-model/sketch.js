@@ -66,7 +66,7 @@ function proccessData(data) {
 
 function normalizeData(data) {
 	return data.map((e, i) => {
-		return (e - normalizeInfo.min) / (normalizeInfo.max - normalizeInfo.min);
+		return tf.tensor2d((e - normalizeInfo.min) / (normalizeInfo.max - normalizeInfo.min));
 	});
 }
 
