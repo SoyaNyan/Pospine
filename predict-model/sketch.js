@@ -1,5 +1,5 @@
 let video;
-let poseNet, mobileNet, posepine;
+let poseNet, mobileNet, pospine;
 let poses = [];
 let batchCount = 0;
 let state = false;
@@ -16,8 +16,8 @@ async function setup() {
 
 	// pospine with mobilenet
 	mobileNet = ml5.featureExtractor("MobileNet");
-	pospine = mobileNet.regression(video, pospineReady());
-	pospine.load("pospine.json", pospineReady);
+	pospine = mobileNet.regression(video, pospineReady);
+	pospine.load("./pospine.json", pospineReady);
 
 	// Create a new poseNet method with a single detection
 	poseNet = ml5.poseNet(video, option, modelReady);
