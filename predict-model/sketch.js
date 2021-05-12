@@ -139,19 +139,3 @@ function drawKeypoints() {
 		}
 	}
 }
-
-// A function to draw the skeletons
-function drawSkeleton() {
-	// Loop through all the skeletons detected
-	for (let i = 0; i < poses.length; i += 1) {
-		// For every skeleton, loop through all body connections
-		for (let j = 0; j < poses[i].skeleton.length; j += 1) {
-			let partA = poses[i].skeleton[j][0];
-			let partB = poses[i].skeleton[j][1];
-			ctx.beginPath();
-			ctx.moveTo(partA.position.x, partA.position.y);
-			ctx.lineTo(partB.position.x, partB.position.y);
-			ctx.stroke();
-		}
-	}
-}
