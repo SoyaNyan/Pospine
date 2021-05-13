@@ -44,25 +44,6 @@ async function setup() {
 	inportModel(pospineModel);
 	pospine = await tf.loadLayersModel("localstorage://pospine");
 	$("#status").text("Pospine ready!");
-
-	// poseNet.on("pose", function (results) {
-	// 	poses = results;
-
-	// 	if (state) {
-	// 		while (batchCount < 1) {
-	// 			let x = proccessData(poses);
-	// 			let xs = normalizeData(x);
-
-	// 			if (isPospineLoaded && isVideoLoaded) {
-	// 				pospine.predict(xs);
-	// 			}
-
-	// 			batchCount++;
-	// 		}
-	// 		state = false;
-	// 		batchCount = 0;
-	// 	}
-	// });
 }
 
 function estimatePoses() {
