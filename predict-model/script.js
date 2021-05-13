@@ -95,20 +95,20 @@ const updateGoodProgress = () => {
 	const storedData = loadStatistics();
 
 	const progress = $("#good-progress");
-	progress.css("width", `${(storedData.goodPose / storedData.totalPose).toFixed(2) * 100}%`);
-	progress.attr("aria-valuenow", (storedData.goodPose / storedData.totalPose).toFixed(2) * 100);
+	progress.css("width", `${((storedData.goodPose / storedData.totalPose) * 100).toFixed(0)}%`);
+	progress.attr("aria-valuenow", ((storedData.goodPose / storedData.totalPose) * 100).toFixed(0));
 
-	$("#good-percent").text(`${(storedData.goodPose / storedData.totalPose).toFixed(4) * 100}%`);
+	$("#good-percent").text(`${((storedData.goodPose / storedData.totalPose) * 100).toFixed(2)}%`);
 };
 
 const updateBadProgress = () => {
 	const storedData = loadStatistics();
 
 	const progress = $("#bad-progress");
-	progress.css("width", `${(storedData.badPose / storedData.totalPose).toFixed(2) * 100}%`);
-	progress.attr("aria-valuenow", (storedData.badPose / storedData.totalPose).toFixed(2) * 100);
+	progress.css("width", `${((storedData.badPose / storedData.totalPose) * 100).toFixed(0)}%`);
+	progress.attr("aria-valuenow", ((storedData.badPose / storedData.totalPose) * 100).toFixed(0));
 
-	$("#bad-percent").text(`${(storedData.badPose / storedData.totalPose).toFixed(4) * 100}%`);
+	$("#bad-percent").text(`${((storedData.badPose / storedData.totalPose) * 100).toFixed(2)}%`);
 };
 
 const updateTotalCaptured = () => {
