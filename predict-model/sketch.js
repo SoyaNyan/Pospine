@@ -5,16 +5,19 @@ let batchCount = 0;
 let state = false;
 
 // options
-let modelSize = 0.75;
-let imageScaleFactor = 0.75;
-let flipHorizontal = false;
-let outputStride = 16;
-let maxPoseDetections = 10;
+const poseNetOptions = {
+	modelSize: 0.75,
+	outputStride: 16,
+	flipHorizontal: false,
+	imageScaleFactor: 0.75,
+};
 
+// video & canvas elements
 let video = document.getElementById("video");
 let canvas = document.getElementById("video-canvas");
 let ctx = canvas.getContext("2d");
 
+// load webcam from browser
 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 	navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
 		video.srcObject = stream;
@@ -22,6 +25,7 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 	});
 }
 
+// app setup(p5js)
 async function setup() {
 	// load posenet by downloading the weights for the model.
 	let videoElem = document.getElementById("video");
@@ -29,8 +33,8 @@ async function setup() {
 		posenet
 			.load({
 				architecture: "MobileNetV1",
-				outputStride: outputStride,
-				multiplier: modelSize,
+				outputStride: poseNetOptions.outputStride,
+				multiplier: poseNetOptions.modelSize,
 			})
 			.then(function (loadedNet) {
 				net = loadedNet;
@@ -41,14 +45,20 @@ async function setup() {
 			});
 	});
 
+	// load pospine model
 	inportModel(pospineModel);
 	pospine = await tf.loadLayersModel("localstorage://pospine");
 	$("#status").text("Pospine ready!");
 }
 
+// PoseNet Single-pose Estimation
 function estimatePoses() {
 	// call posenet to estimate a pose
-	net.estimateSinglePose(video, imageScaleFactor, flipHorizontal).then(function (pose) {
+	net.estimateSinglePose(
+		video,
+		poseNetOptions.imageScaleFactor,
+		poseNetOptions.flipHorizontal
+	).then(function (pose) {
 		// store the keypoints from the pose to draw it below
 		poses = [
 			{
@@ -58,7 +68,7 @@ function estimatePoses() {
 
 		if (state) {
 			while (batchCount < 1) {
-				let x = normalizeData(proccessData(poses));
+				let x = normalizeData(processData(poses));
 				let xs = tf.tensor2d(x, [1, 34]);
 
 				let pred = pospine.predict(xs);
@@ -70,14 +80,20 @@ function estimatePoses() {
 							poseClass: true,
 							score: score,
 						});
+						saveStatistics({
+							poseClass: true,
+						});
 					} else {
 						addOutputToast({
 							poseClass: false,
 							score: score,
 						});
+						saveStatistics({
+							poseClass: false,
+						});
 					}
+					updateStatistics();
 				});
-
 				batchCount++;
 			}
 			state = false;
@@ -97,7 +113,8 @@ function estimatePoses() {
 	});
 }
 
-function proccessData(data) {
+// process input
+function processData(data) {
 	let pose = data[0].pose;
 	let keyPoints = pose.keypoints;
 	let tmpArray = [];
@@ -110,6 +127,7 @@ function proccessData(data) {
 	return tmpArray;
 }
 
+// normalize input
 function normalizeData(data) {
 	return data.map((e, i) => {
 		return (e - normalizeInfo.min) / (normalizeInfo.max - normalizeInfo.min);
