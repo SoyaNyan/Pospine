@@ -9,7 +9,6 @@ const poseNetOptions = {
 	modelSize: 0.75,
 	outputStride: 16,
 	flipHorizontal: false,
-	imageScaleFactor: 0.75,
 };
 
 // video & canvas elements
@@ -54,11 +53,7 @@ async function setup() {
 // PoseNet Single-pose Estimation
 function estimatePoses() {
 	// call posenet to estimate a pose
-	net.estimateSinglePose(
-		video,
-		poseNetOptions.imageScaleFactor,
-		poseNetOptions.flipHorizontal
-	).then(function (pose) {
+	net.estimateSinglePose(video, poseNetOptions.flipHorizontal).then(function (pose) {
 		// store the keypoints from the pose to draw it below
 		poses = [
 			{
