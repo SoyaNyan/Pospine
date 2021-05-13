@@ -15,6 +15,7 @@ $(document).on("click", "#capture-start", function () {
 
 $(document).on("click", "#reset-data", function () {
 	resetStatistics();
+	updateGoodProgress();
 });
 
 // data format
