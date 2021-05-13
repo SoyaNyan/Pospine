@@ -27,7 +27,6 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 // app setup(p5js)
 async function setup() {
 	// load posenet by downloading the weights for the model.
-	let videoElem = document.getElementById("video");
 	video.addEventListener("loadeddata", function () {
 		posenet
 			.load({
@@ -101,7 +100,6 @@ function estimatePoses() {
 			ctx.drawImage(video, 0, 0, 640, 480);
 			// We can call both functions to draw all keypoints and the skeletons
 			drawKeypoints();
-
 			// Loop over the drawCameraIntoCanvas function
 			estimatePoses();
 		});
