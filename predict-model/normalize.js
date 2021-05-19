@@ -1,5 +1,1 @@
-const normalizeInfo = {
-	"min": -41.719547969357976,
-	"max": 689.0766354571984,
-	"size": 1357,
-};
+const normalizeInfo = { "min": -48.84735226167315, "max": 685.1878647859922, "size": 1560 };
