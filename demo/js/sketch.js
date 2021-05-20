@@ -52,7 +52,7 @@ const checkPosture = (predScore, mode) => {
 				title: "Pospine Notification",
 				options: {
 					body: "You're in a bad posture!! Sit up straight.",
-					icon: "http://soya.moe:463/CDN/logo.png",
+					icon: "logo.png",
 				},
 			};
 
