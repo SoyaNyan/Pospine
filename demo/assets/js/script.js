@@ -1,4 +1,5 @@
 let chart;
+let action = false;
 
 $(document).ready(function () {
 	$(".nav-link").on("click", function () {
@@ -21,11 +22,20 @@ $(document).ready(function () {
 		} else {
 			$("#nav-statistics").removeClass("active").removeProp("aria-current");
 			$("#nav-home").addClass("active").prop("aria-current", "page");
-			if ($("#section-main").css("display") === "none") {
-				$("#section-main").slideDown(1000);
-			}
-			if ($("#section-start").css("display") !== "none") {
-				$("#section-start").slideUp(1000);
+			if(action) {
+				if ($("#section-main").css("display") !== "none") {
+					$("#section-main").slideUp(1000);
+				}
+				if ($("#section-start").css("display") === "none") {
+					$("#section-start").slideDown(1000);
+				}
+			} else {
+				if ($("#section-main").css("display") === "none") {
+					$("#section-main").slideDown(1000);
+				}
+				if ($("#section-start").css("display") !== "none") {
+					$("#section-start").slideUp(1000);
+				}
 			}
 			if ($("#section-statistics").css("display") !== "none") {
 				$("#section-statistics").slideUp(1000);
@@ -36,15 +46,21 @@ $(document).ready(function () {
 	$("#start").on("click", function () {
 		$("#section-main").slideUp(1000);
 		$("#section-start").slideDown(1000);
-		state = true;
+		action = true;
 	});
 
 	$("#stop").on("click", function () {
 		$("#section-main").slideDown(1000);
 		$("#section-start").slideUp(1000);
-		state = false;
+		action = false;
 	});
 
+	$(document).on("click", "#reset-data", function () {
+		resetStatistics();
+		updateStatistics();
+	});
+
+	updateStatistics();
 	reloadChart();
 });
 

@@ -2,6 +2,7 @@
 let net, pospine;
 let poses = [];
 let state = false;
+let notifyState = false;
 let predictionArray = [];
 
 // options
@@ -23,6 +24,16 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 		video.play();
 	});
 }
+
+// interval timer(estimation)
+window.setInterval(function() {
+	state = true;
+}, 1000);
+
+// interval timer(notify)
+window.setInterval(function() {
+	notifyState = true;
+}, 5000);
 
 // app setup(p5js)
 async function setup() {
@@ -61,31 +72,30 @@ function estimatePoses() {
 			},
 		];
 
-		if (state) {
-			setInterval(function () {
-				let x = normalizeData(processData(poses));
-				let xs = tf.tensor2d(x, [1, 34]);
+		if (state && action) {
+			let x = normalizeData(processData(poses));
+			let xs = tf.tensor2d(x, [1, 34]);
 
-				let pred = pospine.predict(xs);
-				let score = 0;
-				pred.data().then((data) => {
-					score = data[0].toFixed(3);
-					checkPosture(score, getDetectMode());
+			let pred = pospine.predict(xs);
+			let score = 0;
+			pred.data().then((data) => {
+				score = data[0].toFixed(3);
+				checkPosture(score, getDetectMode());
 
-					// for statistics
-					if (score >= 0.5) {
-						saveStatistics({
-							poseClass: true,
-						});
-					} else {
-						saveStatistics({
-							poseClass: false,
-						});
-					}
+				// for statistics
+				if (score >= 0.5) {
+					saveStatistics({
+						poseClass: true,
+					});
+				} else {
+					saveStatistics({
+						poseClass: false,
+					});
+				}
 
-					updateStatistics();
-				});
-			}, 1000);
+				updateStatistics();
+				state = false;
+			});
 		}
 
 		// next animation loop, call posenet again to estimate poses
@@ -190,11 +200,14 @@ const checkPosture = (predScore, mode) => {
 				title: "Pospine Notification",
 				options: {
 					body: "You're in a bad posture!! Sit up straight.",
-					icon: "logo.png",
+					icon: "assets/image/logo.png",
 				},
 			};
 
-			notify(notification);
+			if(notifyState) {
+				notify(notification);
+				notifyState = false;
+			}
 		}
 	}
 };
