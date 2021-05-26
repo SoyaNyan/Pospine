@@ -7,13 +7,11 @@ const checkNotify = () => {
 		alert("This browser does not support desktop notification");
 	} else if (Notification.permission === "granted") {
 		// if permission granted
-		let noti = new Notification("First Notification");
 		isGranted = true;
 	} else if (Notification.permission !== "denied") {
 		// if permission denied
 		Notification.requestPermission(function (permission) {
 			if (permission === "granted") {
-				let noti = new Notification("First Notification");
 				isGranted = true;
 			}
 		});
