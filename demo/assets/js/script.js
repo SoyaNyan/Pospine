@@ -22,7 +22,7 @@ $(document).ready(function () {
 		} else {
 			$("#nav-statistics").removeClass("active").removeProp("aria-current");
 			$("#nav-home").addClass("active").prop("aria-current", "page");
-			if(action) {
+			if (action) {
 				if ($("#section-main").css("display") !== "none") {
 					$("#section-main").slideUp(1000);
 				}
@@ -60,8 +60,8 @@ $(document).ready(function () {
 		updateStatistics();
 	});
 
-	updateStatistics();
 	reloadChart();
+	updateStatistics();
 });
 
 const loadStatistics = () => {
